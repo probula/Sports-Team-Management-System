@@ -14,11 +14,11 @@ class Player : IPlayer
     public string Position {get; set;}
     public int Score {get; set;}
 
-    public Player(string name, string position)
+    public Player(string name, string position, int score)
     {
         Name = name;
         Position = position;
-        Score = 0;
+        Score = score;
 
     }
 
@@ -49,9 +49,9 @@ class Player : IPlayer
         Console.WriteLine($"Zawodnik: {Name}, Pozycja: {Position}, Punkty: {Score}");
     }
     
-    public static Player SzukajZawodnika(List<Player> players, string position)
+    public static List<Player> SzukajZawodnika(List<Player> players, string position)
     {
-       return players.Find(x => x.Position == position);
+       return players.Where(x => x.Position == position).ToList();
     }
     
 }
@@ -74,7 +74,10 @@ class Team
             Console.WriteLine("Podaj pozycje zawodnika?: ");
             string pozycja = Console.ReadLine();
             
-            Players.Add(new Player(nazwa, pozycja));
+            Console.WriteLine("Podaj poczatkowy wynik zawodnika: ");
+            int wynik = int.Parse(Console.ReadLine());
+            
+            Players.Add(new Player(nazwa, pozycja, wynik)); //dodano wynik
         }
     }
 
@@ -93,13 +96,15 @@ class Team
             Console.WriteLine("Nie znaleziono zawodnika o podanej nazwie.");
         }
     }
+
+    public int SumaPkt()
+    {
+        return Players.Sum(p => p.Score);
+    }
     public void StatystykiDruzyny()
     {
-        Console.WriteLine("Statystyki drużyny: ");
-        foreach (var player in Players)
-        {
-            player.PlayerInfo();
-        }
+        Console.WriteLine($"Punkty zdobyte przez druzyne: {SumaPkt()} ");
+       
     }
 
     public static double SredniaPkt(List<IPlayer> players)
@@ -132,21 +137,29 @@ internal class Program
         
         
         
-        Console.WriteLine("Podaj z jakiej pozycji maja byc zawodnik:");
+        Console.WriteLine("Podaj z jakiej pozycji mają być zawodnicy:");
         string pozycja = Console.ReadLine();
-        var players2 = team.Players.Cast<Player>().ToList(); //cast - konwersja List<Player>
-        
-        var player = Player.SzukajZawodnika(players2, pozycja);
-        if (player != null)
+
+        Console.WriteLine($"Zawodnicy na pozycji {pozycja}:");
+        var znalezieniZawodnicy = Player.SzukajZawodnika(players1, pozycja);
+
+        if (znalezieniZawodnicy.Any())
         {
-            Console.WriteLine("Zawodnicy: ");
-            player.PlayerInfo();
+            foreach (var player in znalezieniZawodnicy)
+            {
+                player.PlayerInfo();
+            }
         }
         else
         {
-            Console.WriteLine("Nie znaleziono zawodnika na podanej pozycji.");
+            Console.WriteLine($"Nie znaleziono zawodników na pozycji {pozycja}.");
         }
         
+        
+        
+        
+        Console.WriteLine("Sprawdz statystyki druzyny: ");
+        team.StatystykiDruzyny();
         
     }
 }
