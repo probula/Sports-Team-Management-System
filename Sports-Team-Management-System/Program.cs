@@ -63,21 +63,40 @@ class Team
     public void Dodaj()
     {
         Console.WriteLine("Ile zawodników chcesz dodać?: ");
-        int ilosc = int.Parse(Console.ReadLine());
+        if (!int.TryParse(Console.ReadLine(), out int ilosc) || ilosc <= 0)
+        {
+            Console.WriteLine("Nieprawidłowa liczba!");
+            return;
+        }
         
-
         for (int i = 0; i < ilosc; i++)
         {
+            
             Console.WriteLine("Podaj nazwe zawodnika");
             string nazwa = Console.ReadLine();
-            
-            Console.WriteLine("Podaj pozycje zawodnika?: ");
+            if (string.IsNullOrWhiteSpace(nazwa))
+            {
+                Console.WriteLine("Nazwa zawodnika nie moze byc pusta!");
+                i--;
+                continue;
+            }
+            Console.WriteLine("Podaj pozycje zawodnika: ");
             string pozycja = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(pozycja))
+            {
+                Console.WriteLine("Pozycja nie moze byc pusta!");
+                continue;
+            }
             
             Console.WriteLine("Podaj poczatkowy wynik zawodnika: ");
-            int wynik = int.Parse(Console.ReadLine());
-            
+            if (!int.TryParse(Console.ReadLine(), out int wynik) || wynik < 0)
+            {
+                Console.WriteLine("Nieprawidłowy wynik!");
+                i--;
+                continue;
+            }
             Players.Add(new Player(nazwa, pozycja, wynik)); //dodano wynik
+            Console.WriteLine($"Dodano zawodnika: {nazwa}, Pozycja: {pozycja}, Wynik: {wynik}");
         }
     }
 
@@ -107,60 +126,71 @@ class Team
        
     }
 
-    public static double SredniaPkt(List<IPlayer> players)
+    public static double SredniaPkt(List<Player> players)
     {
         
         return players.Average(x => x.Score);
     }
-    
-    
-    
 }
 internal class Program
 {
     public static void Main(string[] args)
     {
         Team team = new Team();
-        team.Dodaj();
-        
-        
-        Console.WriteLine("Aktualizuj wynik zawodnika");
         var players1 = team.Players.Cast<Player>().ToList(); // Cast - konwersja do List<Player>
-        Player.ScoreUpdate(players1);
-        
-        team.Usun();
-        
-        var playersList = team.Players.Cast<IPlayer>().ToList();
-        double sredniaPunktow = Team.SredniaPkt(playersList);
-        Console.WriteLine($"Średnia punktów drużyny: {sredniaPunktow}");
-        
-        
-        
-        
-        Console.WriteLine("Podaj z jakiej pozycji mają być zawodnicy:");
-        string pozycja = Console.ReadLine();
 
-        Console.WriteLine($"Zawodnicy na pozycji {pozycja}:");
-        var znalezieniZawodnicy = Player.SzukajZawodnika(players1, pozycja);
-
-        if (znalezieniZawodnicy.Any())
+        while (true)
         {
-            foreach (var player in znalezieniZawodnicy)
+
+            Console.WriteLine("dodaj zawodnika - 1 | usun zawodnika - 2 | zaktualizuj wynik - 3 | szukaj zawodnika - 4 | statystyki drużyny - 5 | średnia pkt - 6 | wyjście - 7");
+            string wybor = Console.ReadLine();
+
+            switch (wybor)
             {
-                player.PlayerInfo();
+                case "1":
+                    team.Dodaj();
+                    break;
+                case "2":
+                    team.Usun();
+                    break;
+                case "3":
+                    Console.WriteLine("Aktualizuj wynik zawodnika");
+                    Player.ScoreUpdate(players1);
+                    break;
+                case "4":
+                    Console.WriteLine("Podaj z jakiej pozycji mają być zawodnicy:");
+                    string pozycja = Console.ReadLine();
+                    Console.WriteLine($"Zawodnicy na pozycji {pozycja}:");
+                    var znalezieniZawodnicy = Player.SzukajZawodnika(players1, pozycja);
+                    if (znalezieniZawodnicy.Any())
+                    {
+                        foreach (var player in znalezieniZawodnicy)
+                        {
+                            player.PlayerInfo();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Nie znaleziono zawodników na pozycji {pozycja}.");
+                    }
+                    break;
+                    
+                case "5":
+                        Console.WriteLine("Sprawdz statystyki druzyny: ");
+                        team.StatystykiDruzyny();
+                        break;
+                case "6":
+                    var playersList = team.Players.Cast<Player>().ToList();
+                    double sredniaPunktow = Team.SredniaPkt(playersList);
+                    Console.WriteLine($"Średnia punktów drużyny: {sredniaPunktow}");
+                    break;
+                case "7":
+                    return;
+                default:
+                    Console.WriteLine("Nieprawidłowa opcja!");
+                    break;
             }
         }
-        else
-        {
-            Console.WriteLine($"Nie znaleziono zawodników na pozycji {pozycja}.");
-        }
-        
-        
-        
-        
-        Console.WriteLine("Sprawdz statystyki druzyny: ");
-        team.StatystykiDruzyny();
-        
     }
 }
  
