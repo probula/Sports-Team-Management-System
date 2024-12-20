@@ -24,26 +24,42 @@ class Player : IPlayer
 
     public static void ScoreUpdate(List<Player> players)
     {
-        Console.WriteLine("Podaj nazwe zawodnika, dla którego chcesz zaktualizować wynik: ");
-        string wybor = Console.ReadLine();
-        
-        
-        Console.WriteLine("Podaj wynik: "); 
-        int wynik = int.Parse(Console.ReadLine());
-        
-        Player? player = players.Find(x => x.Name == wybor);
+        if (players == null || !players.Any())
+        {
+            Console.WriteLine("Nie ma żadnych zawodników do zaktualizowania.");
+            return;
+        }
+        Player player = null; // deklaracja zmiennej
 
-        if (player != null)
+
+        while (true)
         {
-            player.Score = wynik;
-            Console.WriteLine($"Wynik zawodnika {player.Name} zaktualizowany na {player.Score}");
+            Console.WriteLine("Podaj nazwe zawodnika, dla którego chcesz zaktualizować wynik: ");
+            string wybor = Console.ReadLine()?.Trim();
+            
+            if (string.IsNullOrWhiteSpace(wybor))
+            {
+                Console.WriteLine("Nazwa zawodnika nie może być pusta!");
+                continue;
+            }
+            
+
+            player = players.Find(x => x.Name.Equals(wybor, StringComparison.OrdinalIgnoreCase));
+
+            if (player == null)
+            {
+                Console.WriteLine($"Nie znaleziono zawodnika o nazwie {wybor}");
+            }
+            else
+            {
+                break; //koniec petli, zawodnik znaleziony
+            }
         }
-        else
-        {
-            Console.WriteLine("zawodnik nie znaleziony");
-        }
+        Console.WriteLine("Znaleziono zawodnika!\nPodaj nowy wynik:");
+        int wynik = int.Parse(Console.ReadLine());
+        player.Score = wynik;
     }
-    
+
     public void PlayerInfo()
     {
         Console.WriteLine($"Zawodnik: {Name}, Pozycja: {Position}, Punkty: {Score}");
@@ -51,6 +67,7 @@ class Player : IPlayer
     
     public static List<Player> SzukajZawodnika(List<Player> players, string position)
     {
+        position = position.ToLower().Trim();
        return players.Where(x => x.Position == position).ToList();
     }
     
@@ -81,7 +98,7 @@ class Team
                 continue;
             }
             Console.WriteLine("Podaj pozycje zawodnika: ");
-            string pozycja = Console.ReadLine();
+            string pozycja = Console.ReadLine().ToLower().Trim();
             if (string.IsNullOrWhiteSpace(pozycja))
             {
                 Console.WriteLine("Pozycja nie moze byc pusta!");
@@ -155,13 +172,13 @@ internal class Program
                     break;
                 case "3":
                     Console.WriteLine("Aktualizuj wynik zawodnika");
-                    Player.ScoreUpdate(players1);
+                    Player.ScoreUpdate(team.Players.Cast<Player>().ToList()); //przekazuje liste
                     break;
                 case "4":
                     Console.WriteLine("Podaj z jakiej pozycji mają być zawodnicy:");
                     string pozycja = Console.ReadLine();
                     Console.WriteLine($"Zawodnicy na pozycji {pozycja}:");
-                    var znalezieniZawodnicy = Player.SzukajZawodnika(players1, pozycja);
+                    var znalezieniZawodnicy = Player.SzukajZawodnika(team.Players.Cast<Player>().ToList(), pozycja);
                     if (znalezieniZawodnicy.Any())
                     {
                         foreach (var player in znalezieniZawodnicy)
